@@ -1,6 +1,8 @@
+import datetime
 import random
 import time
 import pymysql
+from django.utils import timezone
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -86,7 +88,7 @@ class Spider:
             # 更新日期(最近一个月)
             update = self.browser.find_element_by_xpath('//*[@id="form-item-38"]/div/div/input')
             update.click()
-            self.browser.find_element_by_xpath('/html/body/div[11]/ul/li[5]').click()
+            self.browser.find_element_by_xpath('/html/body/div[11]/ul/li[3]').click()
             # 敲回车触发搜索
             work_year_element.send_keys(Keys.ENTER)
             time.sleep(5)
@@ -226,7 +228,8 @@ class Spider:
                 sleep_time = random.randint(1, 5)
                 print(f"{name} 已爬取 即将休眠 休眠时间: {sleep_time}")
                 time.sleep(sleep_time)
-            except:
+            except Exception as E:
+                print(E)
                 pass
 
     def insert_information_database(self, unique_id, picture, name, gender, age, work_year, education_level,
@@ -255,13 +258,14 @@ class Spider:
         work_experience1 = ""
         for each in work_experience:
             work_experience1 += each + "\n"
-        sql = f"insert into recuritment_person (unique_id, picture, name, gender, age, work_year, education_level, " \
-            f"work_place, work_reward, current_situation, work_character, wanted_job, wanted_industry, " \
-            f"education_experience, work_experience1, url) VALUES ('{unique_id}', '{picture}', '{name}', '{gender}', " \
-            f"'{age}', '{work_year}', '{education_level}', '{work_place}', '{work_reward}', '{current_situation}', " \
-            f"'{work_character}', '{wanted_job}', '{wanted_industry}', '{education_experience}', " \
-            f"'{work_experience1}', '{url}')"
+        time = datetime.datetime.now()
         try:
+            sql = f"insert into recuritment_person (unique_id, picture, name, gender, age, work_year, education_level, " \
+                f"work_place, work_reward, current_situation, work_character, wanted_job, wanted_industry, " \
+                f"education_experience, work_experience1, url, create_timestamp, last_edit_timestamp) VALUES " \
+                f"('{unique_id}', '{picture}', '{name}', '{gender}', '{age}', '{work_year}', '{education_level}', '" \
+                f"{work_place}', '{work_reward}', '{current_situation}', '{work_character}', '{wanted_job}', " \
+                f"'{wanted_industry}', '{education_experience}', '{work_experience1}', '{url}', '{time}', '{time}')"
             cursor = self.db.cursor()
             cursor.execute(sql)
             self.db.commit()
